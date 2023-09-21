@@ -3,18 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31911.196
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimationCurveEditor", "AnimationCurveEditor\AnimationCurveEditor.csproj", "{444DBF3D-DB91-40E5-81C9-814883F10DC5}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Base.AnimationCurveEditor", "AnimationCurveEditor.Core\Base.AnimationCurveEditor.shproj", "{2C750526-70BC-414C-AA07-E8035E7F9D66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimationCurveEditor.Old", "AnimationCurveEditor.Old\AnimationCurveEditor.Old.csproj", "{D565E6D6-DC58-4A69-B2B2-5E2FE0F453E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimationCurveEditor.New", "AnimationCurveEditor.New\AnimationCurveEditor.New.csproj", "{25474892-A957-4500-89BC-248E38E1DBED}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		AnimationCurveEditor.Core\AnimationCurveEditor.Core.projitems*{25474892-a957-4500-89bc-248e38e1dbed}*SharedItemsImports = 4
+		AnimationCurveEditor.Core\AnimationCurveEditor.Core.projitems*{2c750526-70bc-414c-aa07-e8035e7f9d66}*SharedItemsImports = 13
+		AnimationCurveEditor.Core\AnimationCurveEditor.Core.projitems*{d565e6d6-dc58-4a69-b2b2-5e2fe0f453e2}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{444DBF3D-DB91-40E5-81C9-814883F10DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{444DBF3D-DB91-40E5-81C9-814883F10DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{444DBF3D-DB91-40E5-81C9-814883F10DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{444DBF3D-DB91-40E5-81C9-814883F10DC5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D565E6D6-DC58-4A69-B2B2-5E2FE0F453E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D565E6D6-DC58-4A69-B2B2-5E2FE0F453E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D565E6D6-DC58-4A69-B2B2-5E2FE0F453E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D565E6D6-DC58-4A69-B2B2-5E2FE0F453E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25474892-A957-4500-89BC-248E38E1DBED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25474892-A957-4500-89BC-248E38E1DBED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25474892-A957-4500-89BC-248E38E1DBED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25474892-A957-4500-89BC-248E38E1DBED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
