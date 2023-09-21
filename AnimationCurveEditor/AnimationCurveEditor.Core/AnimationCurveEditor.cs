@@ -4,9 +4,9 @@ using UnityEngine;
 
 namespace AnimationCurveEditor
 {
-    class AnimationCurveEditor : MonoBehaviour
+    public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.0";
+        public const string version = "0.1.0";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
@@ -15,6 +15,8 @@ namespace AnimationCurveEditor
         private Material mat;
         public Rect rect { get => _rect; set => changeRect(value); }
         private Rect _rect;
+
+        public EventHandler<EditorClosedArgs> EditorClosedEvent;
 
         // B C
         // A D
@@ -129,6 +131,17 @@ namespace AnimationCurveEditor
         public AnimationCurveEditor Init(AnimationCurve curve)
         {
             return Init(curve, new Rect(200f, 200f, 500f, 500f));
+        }
+
+        public void close()
+        {
+            this.isInit = false;
+            Destroy(this);
+        }
+
+        private void OnDestroy()
+        {
+            if (EditorClosedEvent != null) EditorClosedEvent.Invoke(this, new EditorClosedArgs() { curve = this.curve, rect = this.rect });
         }
 
         public float getAnimationCurveLength()
@@ -344,7 +357,7 @@ namespace AnimationCurveEditor
             // draw ineractive UI
             if (GUI.Button(new Rect(C.x - 47, Screen.height - (C.y + 10 + 22), 45, 20), "EXIT"))
             {
-                isInit = false;
+                close();
             }
             GUI.Label(new Rect(B.x + 5, Screen.height - (B.y + 10 + 25), 200, 25), $"Animation Curve Editor v{version}", textBlack);
 
@@ -745,6 +758,12 @@ namespace AnimationCurveEditor
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, keyframe.outTangent));
 #endif
             }
+        }
+
+        public class EditorClosedArgs : EventArgs
+        {
+            public Rect rect { get; set; }
+            public AnimationCurve curve { get; set; }
         }
     }
 }
