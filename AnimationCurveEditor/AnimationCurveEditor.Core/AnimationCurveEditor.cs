@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace AnimationCurveEditor
@@ -396,7 +393,11 @@ namespace AnimationCurveEditor
                         GUI.Label(new Rect(tooltipKeyframeCtrl.getInHandleScreenCoordinate().Value.x - 105,
                                 Screen.height - (tooltipKeyframeCtrl.getInHandleScreenCoordinate().Value.y - 10),
                                 100, 20),
+#if NEW
                             $"Weigth: {tooltipKeyframeCtrl.keyframe.inWeight.ToString("0.000")}",
+#else
+                            "Weigth: N/A",
+#endif
                             tooltipStyle);
                         break;
                     case KeyframeCtrl.handleKind.outtangent:
@@ -409,7 +410,11 @@ namespace AnimationCurveEditor
                         GUI.Label(new Rect(tooltipKeyframeCtrl.getOutHandleScreenCoordinate().Value.x - 105,
                                 Screen.height - (tooltipKeyframeCtrl.getOutHandleScreenCoordinate().Value.y - 10),
                                 100, 20),
+#if NEW
                             $"Weigth: {tooltipKeyframeCtrl.keyframe.outWeight.ToString("0.000")}",
+#else
+                            "Weigth: N/A",
+#endif
                             tooltipStyle);
                         break;
                     default:
@@ -622,7 +627,7 @@ namespace AnimationCurveEditor
             }
 
             public readonly int keyframeIndex;
-            public Keyframe keyframe { get => editor.curve.GetKey(keyframeIndex); }
+            public Keyframe keyframe { get => editor.curve.keys[keyframeIndex]; }
             private readonly AnimationCurveEditor editor;
             public float handleRadius = 10f;
 
@@ -652,7 +657,11 @@ namespace AnimationCurveEditor
                 float time = keyframe.time;
                 if (time != 0 || time == editor.getAnimationCurveLength()) time = ((screenPos - editor.rect.position).x / editor.rect.width) * editor.getAnimationCurveLength();
                 float value = editor.getCurveValueForScreenY(screenPos.y);
-                editor.curve.MoveKey(keyframeIndex, new Keyframe(time, value, keyframe.inTangent, keyframe.outTangent, keyframe.inWeight, keyframe.outWeight));
+#if NEW
+                editor.curve.MoveKey(keyframeIndex,new Keyframe(time, value, keyframe.inTangent, keyframe.outTangent, keyframe.inWeight, keyframe.outWeight));
+#else
+                editor.curve.MoveKey(keyframeIndex, new Keyframe(time, value, keyframe.inTangent, keyframe.outTangent));
+#endif
             }
             public Rect getHandleRectKey()
             {
@@ -662,8 +671,13 @@ namespace AnimationCurveEditor
             // in
             public Vector3? getInHandleScreenCoordinate()
             {
-                if (keyframe.inWeight == 0 || !hasInTangent) return null;
+#if NEW
+                if (!hasInTangent || keyframe.inWeight == 0) return null;
                 Vector2 handleV = new Vector2(1, keyframe.inTangent).normalized * tangentWeightVectorLengthBasis * keyframe.inWeight;
+#else
+                if (!hasInTangent) return null;
+                Vector2 handleV = new Vector2(1, keyframe.inTangent).normalized * tangentWeightVectorLengthBasis;
+#endif
                 return getKeyHandleScreenCoordinate() - (Vector3)handleV;
             }
 
@@ -671,9 +685,13 @@ namespace AnimationCurveEditor
             {
                 if (!hasInTangent) return;
                 Vector2 handleV = screenPos - (Vector2)getKeyHandleScreenCoordinate();
-                float weight = handleV.magnitude / tangentWeightVectorLengthBasis;
                 float tangent = handleV.y / handleV.x;
+#if NEW
+                float weight = handleV.magnitude / tangentWeightVectorLengthBasis;
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, tangent, keyframe.outTangent, weight, keyframe.outWeight));
+#else
+                editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, tangent, keyframe.outTangent));
+#endif
             }
             public Rect? getHandleRectIn()
             {
@@ -682,14 +700,23 @@ namespace AnimationCurveEditor
             }
             public void resetInTangent()
             {
+#if NEW
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, keyframe.outTangent, 0, keyframe.outWeight));
+#else
+                editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, keyframe.outTangent));
+#endif
             }
 
             // out
             public Vector3? getOutHandleScreenCoordinate()
             {
+#if NEW
                 if (keyframe.outWeight == 0 || !hasOutTangent) return null;
                 Vector2 handleV = new Vector2(1, keyframe.outTangent).normalized * tangentWeightVectorLengthBasis * keyframe.outWeight;
+#else
+                if (!hasOutTangent) return null;
+                Vector2 handleV = new Vector2(1, keyframe.outTangent).normalized * tangentWeightVectorLengthBasis;
+#endif
                 return getKeyHandleScreenCoordinate() + (Vector3)handleV;
             }
 
@@ -699,7 +726,11 @@ namespace AnimationCurveEditor
                 Vector2 handleV = screenPos - (Vector2)getKeyHandleScreenCoordinate();
                 float weight = handleV.magnitude / tangentWeightVectorLengthBasis;
                 float tangent = handleV.y / handleV.x;
+#if NEW
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, tangent, keyframe.inWeight, weight));
+#else
+                editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, tangent));
+#endif
             }
             public Rect? getHandleRectOut()
             {
@@ -708,7 +739,11 @@ namespace AnimationCurveEditor
             }
             public void resetOutTangent()
             {
+#if NEW
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, keyframe.outTangent, keyframe.inWeight, 0));
+#else
+                editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, keyframe.outTangent));
+#endif
             }
         }
     }
