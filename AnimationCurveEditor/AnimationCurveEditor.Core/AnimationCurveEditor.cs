@@ -70,7 +70,7 @@ namespace AnimationCurveEditor
         {
             if (curve.keys.Length < 2)
             {
-                throw new Exception("AnimationCurve passed to AnimationCurveEditor need to have at least two keyframes");
+                throw new Exception("AnimationCurve passed to AnimationCurveEditor needs to have at least two keyframes");
             }
 
             this.rect = pos;
@@ -370,6 +370,14 @@ namespace AnimationCurveEditor
             if (GUI.Button(new Rect(A.x + 260, Screen.height - (A.y - 10), 120, 25), "Add Keyframe"))
             {
                 AddKeyframe(new Keyframe(inputTime, inputValue));
+            }
+
+            if (GUI.Button(new Rect(A.x + 400, Screen.height - (A.y -10), 100, 25), "Autosmooth"))
+            {
+                for (int i = 0; i < curve.length; i++)
+                {
+                    curve.SmoothTangents(i, 0);
+                }
             }
 
             // draw graph value reference
