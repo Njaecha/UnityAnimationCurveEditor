@@ -142,7 +142,7 @@ namespace AnimationCurveEditor
 
         private void OnDestroy()
         {
-            if (EditorClosedEvent != null) EditorClosedEvent.Invoke(this, new EditorClosedArgs() { curve = this.curve, rect = this.rect });
+            EditorClosedEvent?.Invoke(this, new EditorClosedArgs() { curve = this.curve, rect = this.rect });
         }
 
         public float getAnimationCurveLength()
@@ -232,7 +232,7 @@ namespace AnimationCurveEditor
                         RemoveKeyframe(ctrl.keyframeIndex);
                         justRemovedkey = true;
 
-                        KeyframeEdited.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeRemoved });
+                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeRemoved });
                         break;
                     }
                 }
@@ -314,7 +314,7 @@ namespace AnimationCurveEditor
                 Keyframe keyframe = new Keyframe(time, value);
                 AddKeyframe(keyframe);
 
-                KeyframeEdited.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeAdded });
+                KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeAdded });
             }
 
             if ((new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)))
@@ -689,7 +689,7 @@ namespace AnimationCurveEditor
 #else
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(time, value, keyframe.inTangent, keyframe.outTangent));
 #endif
-                editor.KeyframeEdited.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeMoved });
+                editor.KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeMoved });
             }
             public Rect getHandleRectKey()
             {
@@ -720,7 +720,7 @@ namespace AnimationCurveEditor
 #else
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, tangent, keyframe.outTangent));
 #endif
-                editor.KeyframeEdited.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.InTangentMoved });
+                editor.KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.InTangentMoved });
             }
             public Rect? getHandleRectIn()
             {
@@ -760,7 +760,7 @@ namespace AnimationCurveEditor
 #else
                 editor.curve.MoveKey(keyframeIndex, new Keyframe(keyframe.time, keyframe.value, keyframe.inTangent, tangent));
 #endif
-                editor.KeyframeEdited.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.OutTangentMoved });
+                editor.KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = editor.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.OutTangentMoved });
             }
             public Rect? getHandleRectOut()
             {
