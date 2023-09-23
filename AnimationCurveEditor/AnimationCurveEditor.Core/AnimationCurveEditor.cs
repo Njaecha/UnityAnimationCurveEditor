@@ -11,6 +11,7 @@ namespace AnimationCurveEditor
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
         public int samplingRate = 50;
+        public bool borderingKeyframesEditable { get; set; } = true;
 
         private Material mat;
         public Rect rect { get => _rect; set => changeRect(value); }
@@ -73,6 +74,7 @@ namespace AnimationCurveEditor
             {
                 throw new Exception("AnimationCurve passed to AnimationCurveEditor needs to have at least two keyframes");
             }
+            if (min >= max) throw new Exception("Minimum value should be smaller than maximum value!");
 
             this.rect = pos;
             this.curve = curve;
@@ -252,6 +254,7 @@ namespace AnimationCurveEditor
                     {
                         justRemovedkey = true;
                         ctrl.resetInTangent();
+                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.InTangentMoved });
                     }
                 }
                 else if (ctrl.getHandleRectOut().HasValue && ctrl.getHandleRectOut().Value.Contains(Input.mousePosition))
@@ -269,6 +272,7 @@ namespace AnimationCurveEditor
                     {
                         justRemovedkey = true;
                         ctrl.resetOutTangent();
+                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.OutTangentMoved });
                     }
                 }
                 else if (!tooltip)
@@ -367,22 +371,24 @@ namespace AnimationCurveEditor
             }
             GUI.Label(new Rect(B.x + 5, Screen.height - (B.y + 10 + 25), 200, 25), $"Animation Curve Editor v{version}", textBlack);
 
-            GUI.Label(new Rect(A.x, Screen.height - (A.y - 12), 60, 20), "Time:", textWhiteRight);
-            inputTime = float.Parse(GUI.TextField(new Rect(A.x + 65, Screen.height - (A.y - 10), 60, 25), inputTime.ToString("0.000")));
+            GUI.Label(new Rect(A.x, Screen.height - (A.y - 12), 40, 20), "Time:", textWhiteRight);
+            inputTime = float.Parse(GUI.TextField(new Rect(A.x + 45, Screen.height - (A.y - 10), 60, 25), inputTime.ToString("0.000")));
 
-            GUI.Label(new Rect(A.x + 130, Screen.height - (A.y - 12), 60, 20), "Value:", textWhiteRight);
-            inputValue = float.Parse(GUI.TextField(new Rect(A.x + 195, Screen.height - (A.y - 10), 60, 25), inputValue.ToString("0.000")));
+            GUI.Label(new Rect(A.x + 110, Screen.height - (A.y - 12), 40, 20), "Value:", textWhiteRight);
+            inputValue = float.Parse(GUI.TextField(new Rect(A.x + 155, Screen.height - (A.y - 10), 60, 25), inputValue.ToString("0.000")));
 
-            if (GUI.Button(new Rect(A.x + 260, Screen.height - (A.y - 10), 120, 25), "Add Keyframe"))
+            if (GUI.Button(new Rect(A.x + 220, Screen.height - (A.y - 10), 110, 25), "Add Keyframe"))
             {
                 AddKeyframe(new Keyframe(inputTime, inputValue));
             }
 
-            if (GUI.Button(new Rect(A.x + 400, Screen.height - (A.y -10), 100, 25), "Autosmooth"))
+            if (GUI.Button(new Rect(A.x + 335, Screen.height - (A.y -10), 100, 25), "Autosmooth"))
             {
                 for (int i = 0; i < curve.length; i++)
                 {
                     curve.SmoothTangents(i, 0);
+
+                    KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = null, kind = KeyframeEditedArgs.EditKind.AutoSmoothed });
                 }
             }
 
@@ -682,7 +688,8 @@ namespace AnimationCurveEditor
             {
                 if (!editor.rect.Contains(screenPos)) return;
                 float time = keyframe.time;
-                if (time != 0 || time == editor.getAnimationCurveLength()) time = ((screenPos - editor.rect.position).x / editor.rect.width) * editor.getAnimationCurveLength();
+                if ((time == 0 || time == editor.getAnimationCurveLength()) && !editor.borderingKeyframesEditable) return;
+                if (time != 0 && time != editor.getAnimationCurveLength()) time = ((screenPos - editor.rect.position).x / editor.rect.width) * editor.getAnimationCurveLength();
                 float value = editor.getCurveValueForScreenY(screenPos.y);
 #if NEW
                 editor.curve.MoveKey(keyframeIndex,new Keyframe(time, value, keyframe.inTangent, keyframe.outTangent, keyframe.inWeight, keyframe.outWeight));
@@ -787,6 +794,7 @@ namespace AnimationCurveEditor
         {
             public enum EditKind
             {
+                AutoSmoothed,
                 KeyframeAdded,
                 KeyframeRemoved,
                 KeyframeMoved,
@@ -795,7 +803,7 @@ namespace AnimationCurveEditor
             }
 
             public EditKind kind { get; set; }
-            public Keyframe keyframe { get; set; }
+            public Keyframe? keyframe { get; set; }
             public AnimationCurve curve { get; set; }
         }
 
