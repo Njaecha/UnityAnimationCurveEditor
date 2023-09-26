@@ -169,6 +169,12 @@ namespace AnimationCurveEditor
 
         public void AddKeyframe(Keyframe key)
         {
+            if (!borderingKeyframesEditable)
+            {
+                if (key.time > getAnimationCurveLength()) return;
+                if (key.time <= curve.keys[0].time) return;
+            }
+            if (key.time < 0) return;
             curve.AddKey(key);
             updateKeyFrameControlList();
         }
