@@ -6,7 +6,7 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "0.1.0";
+        public const string version = "1.0.0";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
