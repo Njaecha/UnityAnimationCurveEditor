@@ -6,7 +6,7 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.0";
+        public const string version = "1.0.1";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
@@ -340,7 +340,7 @@ namespace AnimationCurveEditor
             }
 
             // eat input for rest of frame
-            if (eatInputArea.Contains(Input.mousePosition))
+            if (eatInputArea.Contains(Input.mousePosition) || draggingHandle)
             {
                 Input.ResetInputAxes();
             }
