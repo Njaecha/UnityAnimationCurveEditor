@@ -6,7 +6,7 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.1";
+        public const string version = "1.0.2";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
@@ -57,6 +57,7 @@ namespace AnimationCurveEditor
         private KeyframeCtrl tooltipKeyframeCtrl;
         private float inputTime = 0;
         private float inputValue = 0;
+        public string displayName = $"Animation Curve Editor v{version}";
 
         /// <summary>
         /// Initialize the Editor for an AnimationCurve
@@ -346,7 +347,7 @@ namespace AnimationCurveEditor
             }
         }
 
-        void OnGUI()
+        public void OnGUI()
         {
             if (!isInit) return;
 
@@ -375,7 +376,7 @@ namespace AnimationCurveEditor
             {
                 close();
             }
-            GUI.Label(new Rect(B.x + 5, Screen.height - (B.y + 10 + 25), 200, 25), $"Animation Curve Editor v{version}", textBlack);
+            GUI.Label(new Rect(B.x + 5, Screen.height - (B.y + 10 + 25), 200, 25), displayName, textBlack);
 
             GUI.Label(new Rect(A.x, Screen.height - (A.y - 12), 40, 20), "Time:", textWhiteRight);
             inputTime = float.Parse(GUI.TextField(new Rect(A.x + 45, Screen.height - (A.y - 10), 60, 25), inputTime.ToString("0.000")));
