@@ -6,7 +6,7 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.2";
+        public const string version = "1.0.3";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
@@ -39,6 +39,11 @@ namespace AnimationCurveEditor
         public float min;
         public float increment;
         private float incrementScreenCoordinate { get => (increment / (max - min)) * (rect.height); }
+
+        /// <summary>
+        /// Set this to false if you temporarily need to stop displaying the graph without destroying it. 
+        /// </summary>
+        public bool display = true;
 
         // windowControls
         Vector2? delta;
@@ -344,7 +349,8 @@ namespace AnimationCurveEditor
             if (eatInputArea.Contains(Input.mousePosition) || draggingHandle)
             {
                 Input.ResetInputAxes();
-            }
+                eatingInput = true;
+            } else eatingInput = false;
         }
 
         public void OnGUI()
