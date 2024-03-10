@@ -6,12 +6,13 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.3";
+        public const string version = "1.0.4";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
         public int samplingRate = 50;
         public bool borderingKeyframesEditable { get; set; } = true;
+        public bool borderingKeyframesDeletable { get; set; } = true;
 
         private Material mat;
         public Rect rect { get => _rect; set => changeRect(value); }
@@ -19,6 +20,8 @@ namespace AnimationCurveEditor
 
         public EventHandler<EditorClosedArgs> EditorClosedEvent;
         public EventHandler<KeyframeEditedArgs> KeyframeEdited;
+
+        public bool eatingInput { get; private set; }
 
         // B C
         // A D
@@ -243,11 +246,14 @@ namespace AnimationCurveEditor
                     // remove key on middle click
                     if (Event.current.type == EventType.MouseDown && Event.current.button == 2)
                     {
-                        RemoveKeyframe(ctrl.keyframeIndex);
-                        justRemovedkey = true;
+                        if (!((ctrl.keyframe.time == 0 || ctrl.keyframe.time == getAnimationCurveLength()) && !borderingKeyframesDeletable))
+                        {
+                            RemoveKeyframe(ctrl.keyframeIndex);
+                            justRemovedkey = true;
 
-                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeRemoved });
-                        break;
+                            KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeRemoved });
+                            break;
+                        }
                     }
                 }
                 // # tangents
