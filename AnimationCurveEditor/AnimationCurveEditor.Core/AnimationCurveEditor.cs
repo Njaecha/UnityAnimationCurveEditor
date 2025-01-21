@@ -6,7 +6,7 @@ namespace AnimationCurveEditor
 {
     public class AnimationCurveEditor : MonoBehaviour
     {
-        public const string version = "1.0.4";
+        public const string version = "1.0.5";
 
         private bool isInit = false;
         public AnimationCurve curve { get; private set; }
@@ -42,6 +42,8 @@ namespace AnimationCurveEditor
         public float min;
         public float increment;
         private float incrementScreenCoordinate { get => (increment / (max - min)) * (rect.height); }
+
+        public bool destoryImmediatelyOnClose { get; set; } = false;
 
         /// <summary>
         /// Set this to false if you temporarily need to stop displaying the graph without destroying it. 
@@ -148,7 +150,8 @@ namespace AnimationCurveEditor
         public void close()
         {
             this.isInit = false;
-            Destroy(this);
+            if (destoryImmediatelyOnClose) DestroyImmediate(this);
+            else Destroy(this);
         }
 
         private void OnDestroy()
@@ -202,6 +205,8 @@ namespace AnimationCurveEditor
             bool mouseOverHeader = headerRect.Contains(Input.mousePosition);
             bool mouseOver = rect.Contains(Input.mousePosition);
 
+            eatingInput = false;
+
             if (mouseOverHeader
                 && Event.current.type == EventType.MouseDrag
                 && !(draggingHandle)
@@ -210,6 +215,7 @@ namespace AnimationCurveEditor
                 if (!delta.HasValue) delta = (Vector2)Input.mousePosition - rect.position;
                 draggingWindow = true;
             }
+
             if (Event.current.type == EventType.MouseUp)
             {
                 draggingWindow = false;
@@ -219,6 +225,7 @@ namespace AnimationCurveEditor
                 draggingKeyframeCtrl = null;
                 delta = null;
             }
+
             if (draggingWindow)
             {
                 if (!delta.HasValue) return;
@@ -233,6 +240,8 @@ namespace AnimationCurveEditor
                 // # keys
                 if (ctrl.getHandleRectKey().Contains(Input.mousePosition))
                 {
+                    eatingInput = true;
+                    
                     drawTooltip = tooltip = true;
                     tooltipKind = KeyframeCtrl.handleKind.keyframe;
                     tooltipKeyframeCtrl = ctrl;
@@ -243,15 +252,22 @@ namespace AnimationCurveEditor
                         draggingHandle = true;
                         draggingHandleKind = KeyframeCtrl.handleKind.keyframe;
                     }
+
                     // remove key on middle click
                     if (Event.current.type == EventType.MouseDown && Event.current.button == 2)
                     {
-                        if (!((ctrl.keyframe.time == 0 || ctrl.keyframe.time == getAnimationCurveLength()) && !borderingKeyframesDeletable))
+                        if (!((ctrl.keyframe.time == 0 || ctrl.keyframe.time == getAnimationCurveLength()) &&
+                              !borderingKeyframesDeletable))
                         {
                             RemoveKeyframe(ctrl.keyframeIndex);
                             justRemovedkey = true;
 
-                            KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeRemoved });
+                            KeyframeEdited?.Invoke(this,
+                                new KeyframeEditedArgs()
+                                {
+                                    curve = this.curve, keyframe = ctrl.keyframe,
+                                    kind = KeyframeEditedArgs.EditKind.KeyframeRemoved
+                                });
                             break;
                         }
                     }
@@ -259,10 +275,13 @@ namespace AnimationCurveEditor
                 // # tangents
                 else if (ctrl.getHandleRectIn().HasValue && ctrl.getHandleRectIn().Value.Contains(Input.mousePosition))
                 {
+                    eatingInput = true;
+                    
                     drawTooltip = tooltip = true;
                     tooltipKind = KeyframeCtrl.handleKind.intangent;
                     tooltipKeyframeCtrl = ctrl;
-                    if (Event.current.type == EventType.MouseDrag && (Event.current.button == 1 || Event.current.button == 0))
+                    if (Event.current.type == EventType.MouseDrag &&
+                        (Event.current.button == 1 || Event.current.button == 0))
                     {
                         draggingKeyframeCtrl = ctrl;
                         draggingHandle = true;
@@ -272,15 +291,24 @@ namespace AnimationCurveEditor
                     {
                         justRemovedkey = true;
                         ctrl.resetInTangent();
-                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.InTangentMoved });
+                        KeyframeEdited?.Invoke(this,
+                            new KeyframeEditedArgs()
+                            {
+                                curve = this.curve, keyframe = ctrl.keyframe,
+                                kind = KeyframeEditedArgs.EditKind.InTangentMoved
+                            });
                     }
                 }
-                else if (ctrl.getHandleRectOut().HasValue && ctrl.getHandleRectOut().Value.Contains(Input.mousePosition))
+                else if (ctrl.getHandleRectOut().HasValue &&
+                         ctrl.getHandleRectOut().Value.Contains(Input.mousePosition))
                 {
+                    eatingInput = true;
+                    
                     drawTooltip = tooltip = true;
                     tooltipKind = KeyframeCtrl.handleKind.outtangent;
                     tooltipKeyframeCtrl = ctrl;
-                    if (Event.current.type == EventType.MouseDrag && (Event.current.button == 1 || Event.current.button == 0))
+                    if (Event.current.type == EventType.MouseDrag &&
+                        (Event.current.button == 1 || Event.current.button == 0))
                     {
                         draggingKeyframeCtrl = ctrl;
                         draggingHandle = true;
@@ -290,7 +318,12 @@ namespace AnimationCurveEditor
                     {
                         justRemovedkey = true;
                         ctrl.resetOutTangent();
-                        KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = ctrl.keyframe, kind = KeyframeEditedArgs.EditKind.OutTangentMoved });
+                        KeyframeEdited?.Invoke(this,
+                            new KeyframeEditedArgs()
+                            {
+                                curve = this.curve, keyframe = ctrl.keyframe,
+                                kind = KeyframeEditedArgs.EditKind.OutTangentMoved
+                            });
                     }
                 }
                 else if (!tooltip)
@@ -300,14 +333,17 @@ namespace AnimationCurveEditor
                 }
 
             }
+
             // move key on left drag
-            if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.keyframe && Event.current.button == 0 && draggingKeyframeCtrl != null)
+            if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.keyframe && Event.current.button == 0 &&
+                draggingKeyframeCtrl != null)
             {
                 draggingKeyframeCtrl.setKeyHandle(Input.mousePosition);
             }
 
             // add tangent on right drag
-            if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.keyframe && Event.current.button == 1 && draggingKeyframeCtrl != null)
+            if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.keyframe && Event.current.button == 1 &&
+                draggingKeyframeCtrl != null)
             {
                 if (Input.mousePosition.x < draggingKeyframeCtrl.getKeyHandleScreenCoordinate().x)
                 {
@@ -322,8 +358,10 @@ namespace AnimationCurveEditor
             // move tangent handles on left drag
             if (draggingKeyframeCtrl != null)
             {
-                if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.intangent) draggingKeyframeCtrl.setInHandle(Input.mousePosition);
-                else if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.outtangent) draggingKeyframeCtrl.setOutHandle(Input.mousePosition);
+                if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.intangent)
+                    draggingKeyframeCtrl.setInHandle(Input.mousePosition);
+                else if (draggingHandle && draggingHandleKind == KeyframeCtrl.handleKind.outtangent)
+                    draggingKeyframeCtrl.setOutHandle(Input.mousePosition);
             }
 
 
@@ -336,27 +374,36 @@ namespace AnimationCurveEditor
                 Keyframe keyframe = new Keyframe(time, value);
                 AddKeyframe(keyframe);
 
-                KeyframeEdited?.Invoke(this, new KeyframeEditedArgs() { curve = this.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeAdded });
+                KeyframeEdited?.Invoke(this,
+                    new KeyframeEditedArgs()
+                        { curve = this.curve, keyframe = keyframe, kind = KeyframeEditedArgs.EditKind.KeyframeAdded });
             }
 
             if ((new Rect(D.x - 10, D.y - 10, 20, 20).Contains(Input.mousePosition)))
             {
                 hoverExpand = true;
+                eatingInput = true;
                 if (Event.current.type == EventType.MouseDrag && Event.current.button == 0) draggingExpand = true;
             }
             else hoverExpand = false;
 
             if (draggingExpand)
             {
-                rect = new Rect(new Vector2(B.x, Input.mousePosition.y), new Vector2(Input.mousePosition.x - B.x, B.y - Input.mousePosition.y));
+                rect = new Rect(new Vector2(B.x, Input.mousePosition.y),
+                    new Vector2(Input.mousePosition.x - B.x, B.y - Input.mousePosition.y));
+            }
+
+            if (eatInputArea.Contains(Input.mousePosition))
+            {
+                eatingInput = true;
             }
 
             // eat input for rest of frame
-            if (eatInputArea.Contains(Input.mousePosition) || draggingHandle)
+            if (eatingInput)
             {
+                Console.Out.WriteLine($"{draggingHandle} {draggingWindow} {draggingExpand}");
                 Input.ResetInputAxes();
-                eatingInput = true;
-            } else eatingInput = false;
+            }
         }
 
         public void OnGUI()
@@ -705,7 +752,7 @@ namespace AnimationCurveEditor
 
             public void setKeyHandle(Vector2 screenPos)
             {
-                if (!editor.rect.Contains(screenPos)) return;
+                if (editor.rect.x > screenPos.x || editor.rect.x + editor.rect.width < screenPos.x) return;
                 float time = keyframe.time;
                 if ((time == 0 || time == editor.getAnimationCurveLength()) && !editor.borderingKeyframesEditable) return;
                 if (time != 0 && time != editor.getAnimationCurveLength()) time = ((screenPos - editor.rect.position).x / editor.rect.width) * editor.getAnimationCurveLength();
