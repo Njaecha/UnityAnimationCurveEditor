@@ -401,7 +401,7 @@ namespace AnimationCurveEditor
             // eat input for rest of frame
             if (eatingInput)
             {
-                Console.Out.WriteLine($"{draggingHandle} {draggingWindow} {draggingExpand}");
+                //Console.Out.WriteLine($"{draggingHandle} {draggingWindow} {draggingExpand}");
                 Input.ResetInputAxes();
             }
         }
